@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ENUMS
+enum Role {
+  ADMIN
+  HOD
+  FACULTY
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum SubmissionStatus {
+  PENDING
+  SUBMITTED
+  GRADED
+}
+
+// ========== USER & PROFILE ==========
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String               // 🔐 Add this line
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile   Profile?
+  admin     Admin?
+  hod       HOD?
+  faculty   Faculty?
+  student   Student?
+}
+
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  firstName    String
+  lastName     String
+  contactPhone String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ========== ROLE-SPECIFIC MODELS ==========
+
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model HOD {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  departmentId String     @unique  // ✅ Ensures one HOD per department
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id])
+}
+
+model Faculty {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  departmentId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  // ✅ Corrected to array
+  sections     Section[]
+}
+
+model Student {
+  id              String     @id @default(cuid())
+  userId          String     @unique
+  studentIdNumber String     @unique
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ✅ Corrected to arrays
+  enrollments     Enrollment[]
+  attendances     Attendance[]
+  submissions     Submission[]
+}
+
+// ========== ACADEMIC STRUCTURE ==========
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hod       HOD?          // ✅ One-to-one now
+  faculties Faculty[]
+  courses   Course[]
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  name         String
+  code         String   @unique
+  description  String?
+  departmentId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department Department @relation(fields: [departmentId], references: [id])
+
+  // ✅ Corrected to array
+  subjects   Subject[]
+}
+
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  credits     Int
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course   Course   @relation(fields: [courseId], references: [id])
+
+  // ✅ Corrected to array
+  sections Section[]
+}
+
+// ========== SECTION ==========
+
+model Section {
+  id           String   @id @default(cuid())
+  name         String
+  academicYear String
+  semester     Int
+  subjectId    String
+  facultyId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  faculty   Faculty @relation(fields: [facultyId], references: [id])
+
+  // ✅ Corrected to arrays
+  enrollments Enrollment[]
+  attendances Attendance[]
+  assignments Assignment[]
+
+  @@unique([name, academicYear, semester, subjectId, facultyId])
+}
+
+// ========== STUDENT-FOCUSED MODELS ==========
+
+model Enrollment {
+  id             String   @id @default(cuid())
+  studentId      String
+  sectionId      String
+  enrollmentDate DateTime @default(now())
+  finalGrade     String?
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, sectionId])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  remarks   String?
+  studentId String
+  sectionId String
+  createdAt DateTime         @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, sectionId, date])
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  totalMarks  Int
+  sectionId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // ✅ Corrected to array
+  submissions Submission[]
+}
+
+model Submission {
+  id           String           @id @default(cuid())
+  assignmentId String
+  studentId    String
+  submittedAt  DateTime         @default(now())
+  content      String?
+  fileUrl      String?
+  grade        Int?
+  feedback     String?
+  status       SubmissionStatus @default(PENDING)
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+}
