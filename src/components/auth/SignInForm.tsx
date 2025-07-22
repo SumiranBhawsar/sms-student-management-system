@@ -28,7 +28,7 @@ export default function SignInForm() {
         });
 
         if (result?.ok) {
-            router.push("/dashboard");
+            router.push("/");
         } else {
             alert(result?.error || "Invalid email or password");
         }

@@ -22,7 +22,7 @@ export default function RootLayout({
           {/* The gradient classes have been added here, and the solid
             background class `bg-gray-50` has been removed.
           */}
-          <div className="min-h-screen bg-gradient-to-b from-blue-300 to-green-100">
+          <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100">
             {children}
           </div>
         </Provider>

@@ -96,7 +96,7 @@ export const authConfig: AuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      console.log("next auth signin : ", user, account);
+      // console.log("next auth signin : ", user, account);
 
       if (account?.provider === "credentials") {
         return true;
@@ -106,7 +106,7 @@ export const authConfig: AuthOptions = {
     },
 
     async jwt({ token, user }) {
-      console.log("check user : ", user);
+      // console.log("check user : ", user);
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -115,19 +115,19 @@ export const authConfig: AuthOptions = {
 
         token.maxAge = user.rememberMe ? REMEMBER_ME_MAX_AGE : DEFAULT_MAX_AGE;
       }
-      console.log("token", token); //?dev
+      // console.log("token", token); //?dev
       return token;
     },
 
     async session({ token, session }) {
       if (session.user) {
-        console.log("token.role", token.role);
+        // console.log("token.role", token.role);
 
         session.user.role = token.role;
         session.user.id = token.id;
         session.user.rememberMe = token.rememberMe;
       }
-      console.log("session data : ", session);
+      // console.log("session data : ", session);
 
       return session;
     },

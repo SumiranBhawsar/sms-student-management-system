@@ -1,11 +1,16 @@
+// src/components/Hero.tsx
+
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 
 export default function Hero() {
+  const { data: session } = useSession();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -26,13 +31,16 @@ export default function Hero() {
         An all-in-one platform to manage students, faculty, courses, attendance, and assignments with ease and efficiency.
       </p>
 
-      <div className="pt-4">
-        <Link href="/signin">
-          <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700">
-            Get Started
-          </Button>
-        </Link>
-      </div>
+      {!session && (
+        <div className="pt-4">
+          {/* Corrected the link to point to the correct sign-in page path */}
+          <Link href="/signin">
+            <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700">
+              Get Started
+            </Button>
+          </Link>
+        </div>
+      )}
     </motion.div>
   );
 }
