@@ -15,12 +15,19 @@ export default function SignInPageContent() {
 
     useEffect(() => {
         if (!session) return;
+
         const userRole = session?.user?.role;
-        router.push(`/dashboard/${userRole?.toLowerCase() || ""}`);
+
+        // If the user is an ADMIN, redirect to the homepage.
+        if (userRole === "ADMIN") {
+            router.push("/");
+        } else {
+            // For all other roles, redirect to their specific dashboard.
+            router.push(`/dashboard/${userRole?.toLowerCase() || ""}`);
+        }
     }, [session, router]);
 
     return (
-        // The background gradient classes have been removed from this line
         <div className="min-h-screen w-full flex items-center justify-center p-4">
             <div className="w-full max-w-6xl bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 lg:p-12">
                 {/* Header Section */}
