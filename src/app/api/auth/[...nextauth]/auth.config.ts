@@ -95,7 +95,7 @@ export const authConfig: AuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ account }) {
       // console.log("next auth signin : ", user, account);
 
       if (account?.provider === "credentials") {

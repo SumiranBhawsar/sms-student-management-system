@@ -7,7 +7,7 @@ import { Bell, LogOut, User as UserIcon } from "lucide-react";
 
 const AdminDashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { data: session } = useSession();
-  const firstName = session?.user?.name?.split(' ')[0] || 'Admin';
+  // const firstName = session?.user?.name?.split(' ')[0] || 'Admin';
 
   return (
     // Removed padding and adjusted gap for a full-screen layout

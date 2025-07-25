@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/app/(admin)/admin/users/page.tsx
 
 "use client";
@@ -42,7 +43,7 @@ const fetchUsers = async ({ queryKey }: QueryFunctionContext<UserQueryKey>) => {
 
 
 export default function UserManagementPage() {
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
